@@ -77,6 +77,9 @@ export type PlanApiRequest = {
   budget?: string;
   window: Window;
   mode: PlanMode;
+  stopCount?: number; // requested number of stops, e.g. "suggest 2 spots"
+  startTime?: string; // requested start time, e.g. "7pm"
+  near?: string; // requested area, e.g. "it park"
   candidates: PlanCandidate[];
 };
 

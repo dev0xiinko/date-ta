@@ -1,3 +1,4 @@
+import { isValidCode } from "@/lib/auth";
 import { chat } from "@/lib/llm";
 import { buildFinisherUserMessage, FINISHER_SYSTEM } from "@/lib/prompts";
 import type { FinisherApiRequest, FinisherDraft } from "@/lib/types";
@@ -14,6 +15,10 @@ function extractJson(raw: string): unknown {
 }
 
 export async function POST(request: Request) {
+  if (!isValidCode(request.headers.get("x-access-code"))) {
+    return Response.json({ error: "Access code required." }, { status: 401 });
+  }
+
   let body: FinisherApiRequest;
   try {
     body = (await request.json()) as FinisherApiRequest;

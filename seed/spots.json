@@ -1336,5 +1336,52 @@
     "lng": null,
     "hours_text": "Mon-Sat daytime (verify)",
     "source": "social"
+  },
+  {
+    "id": "SB06",
+    "name": "Pavement Records",
+    "category": "Vinyl Bar",
+    "area": "Cebu City",
+    "city": "Cebu City",
+    "price": "$$",
+    "best_time": "evening",
+    "vibe": "chill, vinyl, music-led",
+    "tags": [
+      "vinyl",
+      "music",
+      "speakeasy",
+      "chill",
+      "late-night"
+    ],
+    "move": "records spin all night and you can request a side. grab a cocktail and a couch, low and slow.",
+    "rating": null,
+    "lat": null,
+    "lng": null,
+    "hours_text": "Daily 5PM-1AM",
+    "source": "social"
+  },
+  {
+    "id": "HK01",
+    "name": "Hayati Cafe",
+    "category": "Hookah Lounge",
+    "area": "Cebu City",
+    "city": "Cebu City",
+    "price": "$$",
+    "best_time": "late night",
+    "vibe": "chill, smoky, late-night",
+    "tags": [
+      "hookah",
+      "shisha",
+      "indian",
+      "food",
+      "chill",
+      "late-night"
+    ],
+    "move": "order the biryani and a shisha and settle in. it's a late, low-key hang, not a quick bite.",
+    "rating": null,
+    "lat": null,
+    "lng": null,
+    "hours_text": "Evenings-late (verify)",
+    "source": "social"
   }
 ]

@@ -1,3 +1,4 @@
+import { consumeCredit, creditsRemaining, hasCredit, isValidCode } from "@/lib/auth";
 import { chat } from "@/lib/llm";
 import { buildPlanUserMessage, PLAN_SYSTEM } from "@/lib/prompts";
 import type { PlanApiRequest, PlanLLMResult } from "@/lib/types";
@@ -21,6 +22,18 @@ async function callPlanner(userMessage: string): Promise<PlanLLMResult> {
 }
 
 export async function POST(request: Request) {
+  const code = request.headers.get("x-access-code");
+  if (!isValidCode(code)) {
+    return Response.json({ error: "Access code required." }, { status: 401 });
+  }
+  // Check (but don't spend) credit before the paid LLM call.
+  if (!hasCredit(code)) {
+    return Response.json(
+      { error: "You're out of credits.", credits: 0 },
+      { status: 402 },
+    );
+  }
+
   let body: PlanApiRequest;
   try {
     body = (await request.json()) as PlanApiRequest;
@@ -41,12 +54,16 @@ export async function POST(request: Request) {
     );
   }
 
+  const want = body.stopCount && body.stopCount >= 2 ? Math.min(body.stopCount, 5) : null;
   const candidateIds = new Set(candidates.map((c) => c.id));
   const userMessage = buildPlanUserMessage({
     prompt,
     budget: body.budget,
     window: body.window,
     mode: body.mode === "general" ? "general" : "date",
+    stopCount: want ?? undefined,
+    startTime: body.startTime,
+    near: body.near,
     candidates,
   });
 
@@ -75,5 +92,16 @@ export async function POST(request: Request) {
     return Response.json({ error: "Couldn't build a coherent route. Try rephrasing." }, { status: 422 });
   }
 
-  return Response.json({ title: result.title, summary: result.summary, stops });
+  // Honor an explicit count (e.g. "suggest 2 spots").
+  if (want) stops = stops.slice(0, want);
+
+  // Charge one credit now that we have a real result.
+  consumeCredit(code);
+
+  return Response.json({
+    title: result.title,
+    summary: result.summary,
+    stops,
+    credits: creditsRemaining(code),
+  });
 }

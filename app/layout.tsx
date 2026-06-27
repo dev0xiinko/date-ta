@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Fraunces, Hanken_Grotesk, Space_Mono } from "next/font/google";
+import SwRegister from "@/app/sw-register";
 import "./globals.css";
 
 const fraunces = Fraunces({
@@ -42,8 +43,12 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false, // firm, app-like — no pinch-zoom or input auto-zoom
+  viewportFit: "cover", // run under the notch / home indicator
   themeColor: "#0c0a0d",
-  viewportFit: "cover",
 };
 
 export default function RootLayout({
@@ -56,7 +61,10 @@ export default function RootLayout({
       lang="en"
       className={`${fraunces.variable} ${hanken.variable} ${spaceMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full">{children}</body>
+      <body className="min-h-full">
+        <SwRegister />
+        {children}
+      </body>
     </html>
   );
 }

@@ -57,15 +57,19 @@
 
 html {
   background: var(--ink);
+  -webkit-text-size-adjust: 100%; /* stop iOS inflating text in standalone */
+  overflow-x: hidden;
 }
 
 body {
   background:
     radial-gradient(125% 60% at 50% -2%, #3a1230 0%, #180c1b 38%, #0c0a0d 72%) no-repeat;
   background-color: var(--ink);
-  background-attachment: fixed;
   color: var(--cream);
   min-height: 100dvh;
+  width: 100%;
+  overflow-x: hidden; /* no horizontal scroll → no zoom-out squeeze */
+  overscroll-behavior-y: none; /* kill the rubber-band bounce */
   font-family: var(--font-sans), system-ui, sans-serif;
   /* iOS safe areas (viewport-fit=cover) */
   padding-left: env(safe-area-inset-left);

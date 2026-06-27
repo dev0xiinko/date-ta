@@ -70,14 +70,6 @@ export function isOpenAt(
   });
 }
 
-function matchScore(intentTags: string[], spotTags: string[]): number {
-  if (!intentTags.length) return 0;
-  const set = new Set(spotTags);
-  let n = 0;
-  for (const t of intentTags) if (set.has(t)) n++;
-  return n * 2; // weight tag overlap
-}
-
 function learnedScore(spot: Spot, p: Profile): number {
   let s = 0;
   for (const t of spot.tags) s += p.tagScores[t] ?? 0;
@@ -91,13 +83,15 @@ export type SelectOptions = {
   window: Window;
   day: number; // 0=Sun..6=Sat
   budget?: Spot["price"];
+  nearArea?: string; // bias + anchor the cluster on this area
   profile?: Profile;
   limit?: number; // top-N to return (default 12)
 };
 
 /**
- * Score → hard-filter (window/hours/budget) → geo-cluster around the top
- * anchor → return the top-N candidates for the LLM to sequence.
+ * Score (intent + learned profile) with soft window/budget preferences and a
+ * hard hours gate → geo-cluster around the top anchor → return the top-N
+ * candidates for the LLM to sequence.
  */
 export function selectCandidates(
   spots: Spot[],
@@ -115,21 +109,32 @@ export function selectCandidates(
     // avoid list effectively drops the spot
     if (profile.avoid.includes(spot.id)) continue;
 
-    // Window filter: keep if best_time fits the window, or is unknown.
-    if (spot.best_time && !allowedBestTimes.includes(spot.best_time)) continue;
-
     // Hours filter: drop only when we KNOW it's closed; unknown → keep + flag.
+    // This is the real time gate — a spot open during the window is eligible.
     const open = isOpenAt(spot.hours, day, checkTime);
     if (open === false) continue;
     const unverified = open === null;
 
-    let score = matchScore(intentTags, spot.tags) + learnedScore(spot, profile);
+    const matchTags = intentTags.filter((t) => spot.tags.includes(t));
+    let score = matchTags.length * 2 + learnedScore(spot, profile);
     if (profile.winners.includes(spot.id)) score += 3;
+
+    // Window: a SOFT preference, not a hard filter. `best_time` says when a
+    // spot is *best*, not the only time it's usable (e.g. a cat cafe open till
+    // 10pm is a fine night stop). Deprioritize an off-window spot — but never
+    // when the prompt explicitly asked for it (matchTags), so "cats tonight"
+    // still surfaces the cat cafe.
+    if (spot.best_time && !allowedBestTimes.includes(spot.best_time) && !matchTags.length) {
+      score -= 3;
+    }
 
     // Budget: soft penalty, never a hard drop (spec §4.1.3).
     if (opts.budget && PRICE_RANK[spot.price] > PRICE_RANK[opts.budget]) {
       score -= (PRICE_RANK[spot.price] - PRICE_RANK[opts.budget]) * 1.5;
     }
+
+    // Location: boost spots in/near the requested area.
+    if (opts.nearArea && spot.area.toLowerCase().includes(opts.nearArea)) score += 3;
 
     // small nudge by rating to break ties
     if (spot.rating) score += spot.rating * 0.1;
@@ -140,9 +145,18 @@ export function selectCandidates(
   scored.sort((a, b) => b.score - a.score);
   if (!scored.length) return [];
 
-  // Geo-cluster around the top-scored anchor. Prefer candidates within ~4km
-  // OR sharing the anchor's area. Kills the north-to-south bounce (spec §4.1.4).
-  const anchor = scored[0];
+  // Geo-cluster around an anchor. Default = top-scored; if a location was
+  // requested, anchor on a spot there (prefer one with coords) so the route
+  // centers on that area. Prefer candidates within ~4km OR sharing the anchor's
+  // area — kills the north-to-south bounce (spec §4.1.4).
+  let anchor = scored[0];
+  if (opts.nearArea) {
+    const near = opts.nearArea;
+    anchor =
+      scored.find((c) => c.lat != null && c.lng != null && c.area.toLowerCase().includes(near)) ??
+      scored.find((c) => c.area.toLowerCase().includes(near)) ??
+      anchor;
+  }
   const RADIUS_KM = 4;
 
   const withGeo = scored.map((c) => {

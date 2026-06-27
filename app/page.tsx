@@ -1,7 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Finisher from "@/app/Finisher";
+import Gate from "@/app/Gate";
+import { getAccessCode } from "@/lib/access";
 import { requestPlan } from "@/lib/planner";
 import type { Plan, PlanMode, Price, Spot, Window } from "@/lib/types";
 
@@ -83,9 +85,12 @@ function MapThumb({ spot }: { spot: Spot }) {
   if (MAPBOX_TOKEN) {
     const url = `https://api.mapbox.com/styles/v1/mapbox/dark-v11/static/pin-s+f0589b(${spot.lng},${spot.lat})/${spot.lng},${spot.lat},14/116x116@2x?access_token=${MAPBOX_TOKEN}`;
     return (
-      <div
-        className={base}
-        style={{ backgroundImage: `url(${url})`, backgroundSize: "cover", backgroundPosition: "center" }}
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={url}
+        alt={`map of ${spot.name}`}
+        loading="lazy"
+        className={`${base} object-cover`}
       />
     );
   }
@@ -94,7 +99,7 @@ function MapThumb({ spot }: { spot: Spot }) {
     <div className={`${base} relative`}>
       <div
         className="absolute inset-0"
-        style={{ backgroundImage: `url(${url})`, backgroundSize: "cover", filter: "saturate(.85) brightness(.9)" }}
+        style={{ backgroundImage: `url("${url}")`, backgroundSize: "cover", filter: "saturate(.85) brightness(.9)" }}
       />
       <span
         className="absolute h-[9px] w-[9px] -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-[#0C0A0D]"
@@ -305,6 +310,13 @@ export default function Home() {
   const [copied, setCopied] = useState(false);
   const [finishing, setFinishing] = useState(false);
 
+  // Access gate: null = checking, false = locked, true = unlocked.
+  const [unlocked, setUnlocked] = useState<boolean | null>(null);
+  const [credits, setCredits] = useState<number | null>(null); // null = unlimited/unknown
+  useEffect(() => {
+    setUnlocked(!!getAccessCode());
+  }, []);
+
   async function plan_it() {
     if (!prompt.trim() || loading) return;
     setLoading(true);
@@ -312,10 +324,13 @@ export default function Home() {
     setPlan(null);
     setFinishing(false);
     try {
-      const p = await requestPlan({ prompt, budget, window: windowSel, mode });
+      const { plan: p, credits: c } = await requestPlan({ prompt, budget, window: windowSel, mode });
       setPlan(p);
+      setCredits(c);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Something went wrong.");
+      const msg = e instanceof Error ? e.message : "Something went wrong.";
+      setError(msg);
+      if (/out of credits/i.test(msg)) setCredits(0);
     } finally {
       setLoading(false);
     }
@@ -327,6 +342,18 @@ export default function Home() {
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
   }
+
+  // ── access gate ──
+  if (unlocked === null) return null; // still checking localStorage; avoid flash
+  if (!unlocked)
+    return (
+      <Gate
+        onUnlock={(c) => {
+          setUnlocked(true);
+          setCredits(c);
+        }}
+      />
+    );
 
   // ── loading ──
   if (loading) {
@@ -510,7 +537,9 @@ export default function Home() {
           plot the date <span className="text-[19px] leading-none">›</span>
         </button>
         <div className="mt-[11px] text-center font-mono text-[10px] uppercase tracking-[1.5px] text-faint">
-          no logins · just the route
+          {credits === null
+            ? "no logins · just the route"
+            : `${credits} credit${credits === 1 ? "" : "s"} left`}
         </div>
       </div>
     </div>

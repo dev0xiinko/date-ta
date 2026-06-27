@@ -1,3 +1,4 @@
+import { getAccessCode } from "@/lib/access";
 import { selectCandidates } from "@/lib/candidates";
 import { getAllSpots, getGlobalProfile } from "@/lib/db";
 import { parsePrompt } from "@/lib/intent";
@@ -13,7 +14,7 @@ export async function requestPlan(input: {
   budget?: Price | "";
   window?: Window | "";
   mode?: PlanMode;
-}): Promise<Plan> {
+}): Promise<{ plan: Plan; credits: number | null }> {
   const prompt = input.prompt.trim();
   const [spots, profile] = await Promise.all([getAllSpots(), getGlobalProfile()]);
 
@@ -26,6 +27,7 @@ export async function requestPlan(input: {
     window,
     day,
     budget: input.budget || undefined,
+    nearArea: intent.nearArea ?? undefined,
     profile,
     limit: 12,
   });
@@ -48,12 +50,15 @@ export async function requestPlan(input: {
 
   const res = await fetch("/api/plan", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", "x-access-code": getAccessCode() ?? "" },
     body: JSON.stringify({
       prompt,
       budget: input.budget || undefined,
       window,
       mode: input.mode ?? "date",
+      stopCount: intent.stopCount ?? undefined,
+      startTime: intent.startTime ?? undefined,
+      near: intent.nearArea ?? undefined,
       candidates: compact,
     }),
   });
@@ -74,5 +79,8 @@ export async function requestPlan(input: {
     }));
 
   if (stops.length < 2) throw new Error("Couldn't build a coherent route. Try rephrasing.");
-  return { title: data.title as string, summary: data.summary as string, stops };
+  return {
+    plan: { title: data.title as string, summary: data.summary as string, stops },
+    credits: (data.credits ?? null) as number | null,
+  };
 }

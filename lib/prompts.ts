@@ -3,11 +3,16 @@
 // them type-checked and importable without a file-read.)
 
 export const PLAN_SYSTEM = `You are a Cebu route planner. You are given CANDIDATE spots already filtered for
-fit, opening hours, and location. Choose 3 or 4 that form ONE coherent outing and order
+fit, opening hours, and location. Choose spots that form ONE coherent outing and order
 them as a natural arc: lighter/coffee/craft earlier, food in the middle, views or bars
 to close. Keep the geographic flow tight. Honor the budget/window loosely — don't force
 a bad match. If a learned profile is provided, lean into liked tags and proven winners,
 and steer clear of disliked ones. Reference each spot only by its exact id.
+
+COUNT: if "Stops" is given, return EXACTLY that many; otherwise choose 3 or 4.
+START: if "Start time" is given, schedule the first stop at/around it and flow forward;
+otherwise pick a sensible time for the window.
+NEAR: if "Near" is given, keep every stop in or close to that area.
 
 MODE: if "date", craft it as a romantic date arc and write to that intent. If "general",
 it's a casual outing — friends, solo, or just exploring — so keep the same tight, coherent
@@ -30,6 +35,9 @@ export type PlanUserPayload = {
   budget?: string;
   window: string;
   mode: string;
+  stopCount?: number;
+  startTime?: string;
+  near?: string;
   profileLine?: string;
   candidates: {
     id: string;
@@ -48,6 +56,9 @@ export function buildPlanUserMessage(p: PlanUserPayload): string {
     `Mode: ${p.mode}`,
     `Description: "${p.prompt}"`,
     `Budget: ${p.budget ?? "no constraint"}  Window: ${p.window}`,
+    p.stopCount ? `Stops: ${p.stopCount}` : null,
+    p.startTime ? `Start time: ${p.startTime}` : null,
+    p.near ? `Near: ${p.near}` : null,
     p.profileLine ? `Learned profile: ${p.profileLine}` : null,
     `CANDIDATES (json): ${JSON.stringify(p.candidates)}`,
   ]

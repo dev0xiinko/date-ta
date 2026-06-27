@@ -1,1 +1,1 @@
-a currated dating spots in cebu
+Bai Spots - currated cebu low-key spots ni bro
