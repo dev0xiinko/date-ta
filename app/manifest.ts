@@ -3,10 +3,9 @@ import type { MetadataRoute } from "next";
 // PWA manifest (spec §9.1). Next serves this at /manifest.webmanifest.
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Date Architect",
-    short_name: "Date Arch",
-    description:
-      "A personal AI date planner for Cebu — turn a vibe into a plotted, playable date route.",
+    name: "Bai Spots",
+    short_name: "Bai Spots",
+    description: "curated cebu low-key spots ni bro",
     start_url: "/",
     display: "standalone",
     orientation: "portrait",

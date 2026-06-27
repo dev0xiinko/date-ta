@@ -469,7 +469,7 @@ export default function Home() {
   return (
     <div className="mx-auto flex min-h-[100dvh] w-full max-w-[440px] flex-col">
       <div className="flex-1 px-[22px] pb-4 pt-8">
-        <Eyebrow className="text-[11px] tracking-[2.5px] text-muted-2">cebu · ai date architect</Eyebrow>
+        <Eyebrow className="text-[11px] tracking-[2.5px] text-muted-2">cebu · curated low-key spots</Eyebrow>
         <h1 className="mt-3 font-display text-[35px] font-medium leading-[1.1] tracking-[-0.6px]">
           describe her.
           <br />

@@ -23,13 +23,12 @@ const spaceMono = Space_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Date Architect",
-  description:
-    "A personal AI date planner for Cebu — turn a vibe into a plotted, playable date route.",
-  applicationName: "Date Architect",
+  title: "Bai Spots",
+  description: "curated cebu low-key spots ni bro",
+  applicationName: "Bai Spots",
   appleWebApp: {
     capable: true,
-    title: "Date Architect",
+    title: "Bai Spots",
     statusBarStyle: "black-translucent",
   },
   icons: {

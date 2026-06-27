@@ -33,11 +33,11 @@ export default function Gate({ onUnlock }: { onUnlock: (credits: number | null) 
           boxShadow: "0 10px 30px rgba(240,88,155,.4)",
         }}
       >
-        <span className="font-display text-[26px] font-semibold italic text-on-pink">da</span>
+        <span className="font-display text-[24px] font-semibold italic text-on-pink">bs</span>
       </div>
 
       <h1 className="mt-6 font-display text-[30px] font-medium leading-[1.1] tracking-[-0.4px]">
-        Date <span className="italic text-pink">Architect</span>
+        Bai <span className="italic text-pink">Spots</span>
       </h1>
       <p className="mt-2 text-[14px] leading-[1.5] text-muted">
         invite-only for now. drop your access code to get in.
@@ -67,7 +67,7 @@ export default function Gate({ onUnlock }: { onUnlock: (credits: number | null) 
       </button>
 
       <div className="mt-5 font-mono text-[10px] uppercase tracking-[1.5px] text-faint">
-        cebu · ai date architect
+        curated cebu low-key spots
       </div>
     </main>
   );

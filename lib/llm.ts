@@ -49,7 +49,7 @@ export async function chat(opts: ChatOptions): Promise<string> {
       "Content-Type": "application/json",
       // Optional OpenRouter ranking headers.
       "HTTP-Referer": process.env.OPENROUTER_SITE_URL ?? "http://localhost:3000",
-      "X-Title": "Date Architect",
+      "X-Title": "Bai Spots",
     },
     body: JSON.stringify(body),
   });
