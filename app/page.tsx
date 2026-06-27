@@ -358,7 +358,7 @@ export default function Home() {
   // ── loading ──
   if (loading) {
     return (
-      <main className="mx-auto flex min-h-[100dvh] w-full max-w-[440px] flex-col px-[22px] pb-10 pt-[18px]">
+      <main className="mx-auto flex h-[100dvh] w-full max-w-[440px] flex-col overflow-y-auto px-[22px] pb-10 pt-[max(env(safe-area-inset-top),18px)]">
         <div className="rounded-2xl border border-line bg-card-3 px-[14px] py-3">
           <Eyebrow className="text-[9px] tracking-[2px] text-meta">the vibe</Eyebrow>
           <div className="mt-1.5 text-[13px] leading-snug text-muted">{prompt}</div>
@@ -403,8 +403,8 @@ export default function Home() {
   if (plan) {
     const hrs = routeHours(plan);
     return (
-      <div className="mx-auto flex min-h-[100dvh] w-full max-w-[440px] flex-col">
-        <header className="sticky top-0 z-10 flex items-center justify-between border-b border-line-3 bg-[rgba(12,10,13,.72)] px-[14px] py-[10px] backdrop-blur">
+      <div className="mx-auto flex h-[100dvh] w-full max-w-[440px] flex-col overflow-hidden">
+        <header className="flex flex-none items-center justify-between border-b border-line-3 bg-[rgba(12,10,13,.72)] px-[14px] pb-[10px] pt-[max(env(safe-area-inset-top),10px)] backdrop-blur">
           <button
             onClick={() => setPlan(null)}
             className="flex items-center gap-1 px-2 py-[7px] font-mono text-[12px] text-muted"
@@ -421,7 +421,7 @@ export default function Home() {
           </button>
         </header>
 
-        <div className="flex-1 px-5 pb-5 pt-3.5">
+        <div className="flex-1 overflow-y-auto px-5 pb-5 pt-3.5">
           <div className="rounded-[14px] border border-line bg-card-2 p-4" style={{ borderLeft: "3px solid #F49CC0" }}>
             <div className="font-mono text-[10px] uppercase tracking-[1.5px] text-rose">
               your route · {plan.stops.length} stops{hrs ? ` · ${hrs}` : ""}
@@ -446,7 +446,7 @@ export default function Home() {
           </button>
         </div>
 
-        <footer className="sticky bottom-0 flex gap-[11px] border-t border-line-3 bg-ink-2 px-5 pb-[max(env(safe-area-inset-bottom),24px)] pt-3">
+        <footer className="flex flex-none gap-[11px] border-t border-line-3 bg-ink-2 px-5 pb-[max(env(safe-area-inset-bottom),24px)] pt-3">
           <button
             onClick={plan_it}
             className="flex-1 rounded-[14px] border border-line-2 py-[15px] text-center text-[14px] font-medium text-cream"
@@ -467,17 +467,14 @@ export default function Home() {
 
   // ── composer ──
   return (
-    <div className="mx-auto flex min-h-[100dvh] w-full max-w-[440px] flex-col">
-      <div className="flex-1 px-[22px] pb-4 pt-8">
-        <Eyebrow className="text-[11px] tracking-[2.5px] text-muted-2">cebu · curated low-key spots</Eyebrow>
-        <h1 className="mt-3 font-display text-[35px] font-medium leading-[1.1] tracking-[-0.6px]">
-          describe her.
-          <br />
-          get the <span className="italic text-pink">route</span>.
+    <div className="mx-auto flex h-[100dvh] w-full max-w-[440px] flex-col overflow-hidden">
+      <div className="flex-1 overflow-y-auto px-[22px] pb-4 pt-[max(env(safe-area-inset-top),28px)]">
+        <Eyebrow className="text-[10px] tracking-[2.5px] text-muted-2">cebu · lowkey spots</Eyebrow>
+        <h1 className="mt-2.5 font-display text-[37px] font-medium leading-[1.02] tracking-[-0.6px]">
+          Bai <span className="italic text-pink">Spots</span>
         </h1>
-        <p className="mt-[11px] text-[14px] leading-[1.5] text-muted">
-          one vibe in, a plotted night out — three or four real spots, threaded into a route you can
-          actually run.
+        <p className="mt-2 text-[14px] leading-[1.45] text-muted">
+          lowkey cebu spots, plotted into a route.
         </p>
 
         <Eyebrow className="mt-5 text-[10px] tracking-[2px] text-meta">mode</Eyebrow>
@@ -495,14 +492,13 @@ export default function Home() {
           className="vibe mt-[9px] min-h-[100px] w-full resize-none rounded-2xl bg-card-3 px-4 py-[15px] text-[14.5px] leading-[1.55] text-cream outline-none placeholder:text-placeholder"
         />
 
-        <Eyebrow className="mt-[18px] text-[10px] tracking-[2px] text-meta">or start from one of these</Eyebrow>
-        <div className="mt-2.5 flex flex-wrap gap-2">
+        <div className="swipe -mx-[22px] mt-3 flex gap-2 overflow-x-auto px-[22px] pb-1">
           {SUGGESTIONS.map((s) => (
             <button
               key={s}
               type="button"
               onClick={() => setPrompt(s)}
-              className="rounded-full border border-line-2 bg-card-2 px-[13px] py-[9px] text-[12.5px] leading-none text-muted"
+              className="flex-none whitespace-nowrap rounded-full border border-line-2 bg-card-2 px-[13px] py-[9px] text-[12.5px] leading-none text-muted"
             >
               {s}
             </button>
@@ -527,7 +523,7 @@ export default function Home() {
         )}
       </div>
 
-      <div className="sticky bottom-0 border-t border-line-3 bg-ink-2 px-[22px] pb-[max(env(safe-area-inset-bottom),24px)] pt-3">
+      <div className="flex-none border-t border-line-3 bg-ink-2 px-[22px] pb-[max(env(safe-area-inset-bottom),24px)] pt-3">
         <button
           onClick={plan_it}
           disabled={!prompt.trim()}

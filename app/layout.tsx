@@ -58,9 +58,9 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${fraunces.variable} ${hanken.variable} ${spaceMono.variable} h-full antialiased`}
+      className={`${fraunces.variable} ${hanken.variable} ${spaceMono.variable} antialiased`}
     >
-      <body className="min-h-full">
+      <body>
         <SwRegister />
         {children}
       </body>

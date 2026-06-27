@@ -25,7 +25,7 @@ export default function Gate({ onUnlock }: { onUnlock: (credits: number | null) 
   }
 
   return (
-    <main className="mx-auto flex min-h-[100dvh] w-full max-w-[440px] flex-col items-center justify-center px-[22px] text-center">
+    <main className="mx-auto flex h-[100dvh] w-full max-w-[440px] flex-col items-center justify-center overflow-y-auto px-[22px] text-center">
       <div
         className="flex h-[60px] w-[60px] items-center justify-center rounded-[15px]"
         style={{

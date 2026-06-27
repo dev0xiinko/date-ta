@@ -126,8 +126,8 @@ export default function Finisher({
   }
 
   return (
-    <div className="mx-auto flex min-h-[100dvh] w-full max-w-[440px] flex-col">
-      <header className="sticky top-0 z-10 flex items-center justify-between border-b border-line-3 bg-[rgba(12,10,13,.72)] px-[14px] py-[10px] backdrop-blur">
+    <div className="mx-auto flex h-[100dvh] w-full max-w-[440px] flex-col overflow-hidden">
+      <header className="flex flex-none items-center justify-between border-b border-line-3 bg-[rgba(12,10,13,.72)] px-[14px] pb-[10px] pt-[max(env(safe-area-inset-top),10px)] backdrop-blur">
         <button
           onClick={onBack}
           className="flex items-center gap-1 px-2 py-[7px] font-mono text-[12px] text-muted"
@@ -138,7 +138,7 @@ export default function Finisher({
         <div className="w-[38px]" />
       </header>
 
-      <div className="flex-1 px-[22px] pb-5 pt-3.5">
+      <div className="flex-1 overflow-y-auto px-[22px] pb-5 pt-3.5">
         <h1 className="font-display text-[30px] font-medium leading-[1.1] tracking-[-0.4px]">
           how&apos;d it go?
         </h1>
@@ -309,7 +309,7 @@ export default function Finisher({
         </div>
       </div>
 
-      <footer className="sticky bottom-0 border-t border-line-3 bg-ink-2 px-5 pb-[max(env(safe-area-inset-bottom),24px)] pt-3">
+      <footer className="flex-none border-t border-line-3 bg-ink-2 px-5 pb-[max(env(safe-area-inset-bottom),24px)] pt-3">
         {saved ? (
           <button
             onClick={onSaved}
