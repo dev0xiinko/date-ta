@@ -16,8 +16,10 @@ function extractJson(raw: string): unknown {
   return JSON.parse(cleaned.slice(start, end + 1));
 }
 
+// A 3–4 stop JSON plan is ~600–800 tokens; 1024 is ample and cheaper (and
+// keeps requests affordable on a low OpenRouter balance).
 async function callPlanner(userMessage: string): Promise<PlanLLMResult> {
-  const text = await chat({ system: PLAN_SYSTEM, user: userMessage, maxTokens: 1500, json: true });
+  const text = await chat({ system: PLAN_SYSTEM, user: userMessage, maxTokens: 1024, json: true });
   return extractJson(text) as PlanLLMResult;
 }
 

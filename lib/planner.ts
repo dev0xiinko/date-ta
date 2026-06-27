@@ -1,5 +1,5 @@
 import { getAccessCode } from "@/lib/access";
-import { selectCandidates } from "@/lib/candidates";
+import { selectAvailable } from "@/lib/candidates";
 import { getAllSpots, getGlobalProfile } from "@/lib/db";
 import { parsePrompt } from "@/lib/intent";
 import type { Plan, PlanCandidate, PlanMode, Price, Spot, Window } from "@/lib/types";
@@ -22,31 +22,36 @@ export async function requestPlan(input: {
   const window: Window = input.window || intent.window || "night";
   const day = new Date().getDay();
 
-  const candidates = selectCandidates(spots, {
-    intentTags: intent.tags,
+  // Code only filters to what's OPEN during the window (+ drops profile avoids);
+  // the LLM reads this set, parses the intent, and matches by reasoning.
+  const candidates = selectAvailable(spots, {
     window,
     day,
-    budget: input.budget || undefined,
     nearArea: intent.nearArea ?? undefined,
     profile,
-    limit: 12,
+    limit: 30,
   });
   if (candidates.length < 2) {
     throw new Error(
-      "Not enough open spots match that for this time. Try a different vibe or window.",
+      "Not enough open spots for this time. Try a different window.",
     );
   }
 
-  const compact: PlanCandidate[] = candidates.map((c) => ({
-    id: c.id,
-    name: c.name,
-    category: c.category,
-    area: c.area,
-    price: c.price,
-    best_time: c.best_time,
-    tags: c.tags,
-    move: c.move,
-  }));
+  // Group by area so same-area spots sit together in the list — a free nudge
+  // toward a geographically tight route.
+  const compact: PlanCandidate[] = [...candidates]
+    .sort((a, b) => a.area.localeCompare(b.area))
+    .map((c) => ({
+      id: c.id,
+      name: c.name,
+      category: c.category,
+      area: c.area,
+      price: c.price,
+      best_time: c.best_time,
+      tags: c.tags,
+      move: c.move,
+      vibe: c.vibe,
+    }));
 
   const res = await fetch("/api/plan", {
     method: "POST",

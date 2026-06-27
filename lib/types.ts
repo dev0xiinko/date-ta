@@ -65,7 +65,7 @@ export type Plan = {
 /** Compact spot projection sent to /api/plan (the LLM never sees coords/hours). */
 export type PlanCandidate = Pick<
   Spot,
-  "id" | "name" | "category" | "area" | "price" | "best_time" | "tags" | "move"
+  "id" | "name" | "category" | "area" | "price" | "best_time" | "tags" | "move" | "vibe"
 >;
 
 /** "date" = romantic date arc; "general" = a casual outing / good spots. */

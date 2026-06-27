@@ -131,6 +131,22 @@ const PLACES = [
 
 const NUM_WORDS: Record<string, number> = { one: 1, two: 2, three: 3, four: 4, five: 5, couple: 2, few: 3 };
 
+// Word-boundary matcher (allows a trailing plural), so terms only match as
+// whole words — no "artisan"→"tisa" or "barkada"→"bar" false positives.
+// Compiled once at module load (not per call).
+function term(t: string): RegExp {
+  const e = t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return new RegExp(`\\b${e}(?:s|es)?\\b`, "i");
+}
+const KEYWORD_RX: [RegExp, string[]][] = Object.entries(KEYWORD_TAGS).map(([k, v]) => [term(k), v]);
+const PLACE_RX: [RegExp, string][] = PLACES.map((p) => [term(p), p]);
+const NIGHT_RX = NIGHT_WORDS.map(term);
+const DAY_RX = DAY_WORDS.map(term);
+const NUM_RX: [RegExp, number][] = Object.entries(NUM_WORDS).map(([w, n]) => [
+  new RegExp(`\\b${w}\\b\\s*(?:spots?|stops?|places?)`, "i"),
+  n,
+]);
+
 function hourOf(time: string): number | null {
   const m = time.toLowerCase().match(/^(\d{1,2})(?::(\d{2}))?\s*(am|pm)?$/);
   if (!m) return null;
@@ -143,27 +159,28 @@ function hourOf(time: string): number | null {
 
 /** Parse a free-text prompt into intent tags, window, location, count, and time. */
 export function parsePrompt(prompt: string): ParsedIntent {
-  const lower = ` ${prompt.toLowerCase()} `;
+  const lower = prompt.toLowerCase();
   const tags = new Set<string>();
 
-  for (const [keyword, mapped] of Object.entries(KEYWORD_TAGS)) {
-    if (lower.includes(keyword)) mapped.forEach((t) => tags.add(t));
+  for (const [rx, mapped] of KEYWORD_RX) {
+    if (rx.test(lower)) mapped.forEach((t) => tags.add(t));
   }
 
-  // location
-  const nearArea = PLACES.find((p) => lower.includes(p)) ?? null;
+  // location (PLACES is ordered most-specific-first; first match wins)
+  const nearArea = PLACE_RX.find(([rx]) => rx.test(lower))?.[1] ?? null;
 
   // stop count: "2 spots" / "two stops" / "a couple"
   let stopCount: number | null = null;
-  const digit = lower.match(/(\d+)\s*(?:spots?|stops?|places?|stop)/);
+  const digit = lower.match(/(\d+)\s*(?:spots?|stops?|places?)/);
   if (digit) stopCount = +digit[1];
   else {
-    for (const [w, n] of Object.entries(NUM_WORDS)) {
-      if (new RegExp(`\\b${w}\\b\\s*(?:spots?|stops?|places?)`).test(lower) || (w === "couple" && /\ba couple\b/.test(lower))) {
+    for (const [rx, n] of NUM_RX) {
+      if (rx.test(lower)) {
         stopCount = n;
         break;
       }
     }
+    if (stopCount == null && /\ba couple\b/.test(lower)) stopCount = 2;
   }
   if (stopCount != null) stopCount = Math.max(2, Math.min(5, stopCount));
 
@@ -173,8 +190,8 @@ export function parsePrompt(prompt: string): ParsedIntent {
 
   // window: word signals, overridden by an explicit clock time
   let window: Window | null = null;
-  const nightHits = NIGHT_WORDS.filter((w) => lower.includes(w)).length;
-  const dayHits = DAY_WORDS.filter((w) => lower.includes(w)).length;
+  const nightHits = NIGHT_RX.filter((rx) => rx.test(lower)).length;
+  const dayHits = DAY_RX.filter((rx) => rx.test(lower)).length;
   if (nightHits > dayHits) window = "night";
   else if (dayHits > nightHits) window = "day";
   if (startTime) {
