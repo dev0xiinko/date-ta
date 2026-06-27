@@ -1,26 +1,93 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* dusk / pink palette — from the Date Architect design system */
+  --ink: #08070a;
+  --ink-2: #0c0a0d;
+  --card: #1c171f;
+  --card-2: #17141a;
+  --card-3: #120c14;
+  --pink: #f0589b;
+  --rose: #f49cc0;
+  --blush: #e7a6c2;
+  --cream: #f4eef2;
+  --on-pink: #2a0a16;
+  --muted: #afa0ac;
+  --muted-2: #998a96;
+  --meta: #897d88;
+  --faint: #796d77;
+  --placeholder: #6e616b;
+  --line: #27202b;
+  --line-2: #332a37;
+  --line-3: #221c26;
+  --pink-line: #4a2b3c;
+  --soft: #d8c8d2;
+  --soft-2: #e6d8e2;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-card: var(--card);
+  --color-card-2: var(--card-2);
+  --color-card-3: var(--card-3);
+  --color-pink: var(--pink);
+  --color-rose: var(--rose);
+  --color-blush: var(--blush);
+  --color-cream: var(--cream);
+  --color-on-pink: var(--on-pink);
+  --color-muted: var(--muted);
+  --color-muted-2: var(--muted-2);
+  --color-meta: var(--meta);
+  --color-faint: var(--faint);
+  --color-soft: var(--soft);
+  --color-soft-2: var(--soft-2);
+  --color-line: var(--line);
+  --color-line-2: var(--line-2);
+  --color-line-3: var(--line-3);
+  --color-pink-line: var(--pink-line);
+  --font-display: var(--font-fraunces);
+  --font-sans: var(--font-hanken);
+  --font-mono: var(--font-space-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+@keyframes blink { 50% { opacity: 0; } }
+@keyframes pulse { 0%, 100% { opacity: 0.32; } 50% { opacity: 0.8; } }
+@keyframes glowpulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+
+html {
+  background: var(--ink);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background:
+    radial-gradient(125% 60% at 50% -2%, #3a1230 0%, #180c1b 38%, #0c0a0d 72%) no-repeat;
+  background-color: var(--ink);
+  background-attachment: fixed;
+  color: var(--cream);
+  min-height: 100dvh;
+  font-family: var(--font-sans), system-ui, sans-serif;
+  /* iOS safe areas (viewport-fit=cover) */
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+/* gradient pink fills */
+.grad-pink {
+  background: linear-gradient(135deg, #f87bb0 0%, #f0589b 55%, #d63f82 100%);
+  color: var(--on-pink);
+}
+.grad-pink-soft {
+  background: linear-gradient(135deg, #f87bb0, #f0589b);
+  color: var(--on-pink);
+}
+
+/* the vibe textarea focus glow */
+.vibe {
+  border: 1px solid var(--line-2);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.vibe:focus {
+  border-color: var(--pink);
+  box-shadow: 0 0 0 3px rgba(240, 88, 155, 0.2);
 }
